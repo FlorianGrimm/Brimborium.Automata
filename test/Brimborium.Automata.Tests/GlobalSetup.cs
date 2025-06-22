@@ -6,15 +6,12 @@
 
 namespace Brimborium.Automata.Tests;
 
-public class GlobalHooks
-{
+public class GlobalHooks {
     [Before(TestSession)]
-    public static void SetUp()
-    {
+    public static void SetUp() {
     }
 
     [After(TestSession)]
-    public static void CleanUp()
-    {
+    public static void CleanUp() {
     }
 }
