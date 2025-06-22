@@ -3,7 +3,7 @@ namespace Brimborium.Automata;
 public class IdeaTests {
     [Test]
     public async Task Idea() {
-        var builder = new DeterministicStateMachineBuilder();
+        var builder = new StateMachineBuilder();
         var initialState = builder.State("InitialState");
         var state1 = builder.State("State1");
         var state2 = builder.State("State2");
@@ -11,8 +11,8 @@ public class IdeaTests {
         initialState.WithTransition("Event2").To(state2);
         state1.WithTransition("Event2").To(state2);
 
-        var stateMachine=builder.Build();
-        
+        var stateMachine = new DeterministicStateMachine(builder);
+
         stateMachine.Next("Event1");
         await Assert.That(stateMachine.State.Name).IsEqualTo("State1");
 
