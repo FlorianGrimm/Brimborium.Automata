@@ -1,0 +1,2 @@
+# Brimborium.Automata
+Statemaschines
