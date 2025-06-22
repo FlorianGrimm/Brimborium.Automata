@@ -1,4 +1,5 @@
 ﻿namespace Brimborium.Automata;
+#if false
 public class State {
 
     private readonly List<StateTransition> _ListTransitions = new();
@@ -91,18 +92,22 @@ public class StateMachineBuilder {
 
 public class DeterministicStateMachine {
     private readonly StateMachineBuilder _Builder;
-    private State _State;
+    private State? _State;
 
     public DeterministicStateMachine(StateMachineBuilder builder) {
         this._Builder = builder;
-        this._State = builder.InitialState;
     }
 
-    public State State { get => this._State; set => this._State = value; }
+    public State State { get => this._State ?? this._Builder.InitialState; set => this._State = value; }
 
     public StateMachineBuilder Builder => this._Builder;
 
     public State Next(string eventName) {
+        if (this._State is null) {            
+            this._State = this._Builder.InitialState;
+            this._State.OnEnter();
+        }
+
         var transition = this._State.GetTransition(eventName);
         if (transition is null) {
             throw new InvalidOperationException($"No transition defined for event '{eventName}' in state '{this._State.Name}'.");
@@ -123,3 +128,4 @@ public class DeterministicStateMachine {
         }
     }
 }
+#endif

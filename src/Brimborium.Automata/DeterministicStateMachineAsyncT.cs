@@ -1,11 +1,12 @@
 ﻿namespace Brimborium.Automata;
-#if false
+#if true
 public enum StateKind {
     Initial,
     Final,
     Error,
     Normal
 }
+
 public class State<TEvent> {
 
     private readonly List<StateTransition<TEvent>> _ListTransitions = new();
@@ -41,10 +42,12 @@ public class State<TEvent> {
         return null;
     }
 
-    public virtual void OnEnter(TEvent currentEvent, State<TEvent>? previousState) {
+    public virtual ValueTask OnEnterAsync(TEvent currentEvent, State<TEvent>? previousState) {
+        return ValueTask.CompletedTask;
     }
 
-    public virtual void OnExit(TEvent nextEvent, State<TEvent> nextState) {
+    public virtual ValueTask OnExitAsync(TEvent nextEvent, State<TEvent> nextState) {
+        return ValueTask.CompletedTask;
     }
 }
 
@@ -69,7 +72,8 @@ public class StateTransition<TEvent> : IStateTransitionChecker<TEvent> {
         return this;
     }
 
-    public virtual void OnExecute(TEvent currentEvent, State<TEvent> nextState) {
+    public virtual ValueTask OnExecuteAsync(TEvent currentEvent, State<TEvent> nextState) {
+        return ValueTask.CompletedTask;
     }
 
 
@@ -127,10 +131,10 @@ public class StateMachineBuilder<TEvent> {
     }
 }
 
-public class DeterministicStateMachine<TEvent> {
+public class StateMachine<TEvent> {
     private readonly StateMachineBuilder<TEvent> _Builder;
     private State<TEvent>? _State;
-    public DeterministicStateMachine(StateMachineBuilder<TEvent> builder) {
+    public StateMachine(StateMachineBuilder<TEvent> builder) {
         this._Builder = builder;
     }
     public State<TEvent> State {
@@ -138,23 +142,28 @@ public class DeterministicStateMachine<TEvent> {
     }
 
     public StateMachineBuilder<TEvent> Builder => this._Builder;
-    public State<TEvent> Next(TEvent currentEvent) {
+
+    public async Task<State<TEvent>> NextAsync(TEvent currentEvent) {
         var currentState = this._State;
         if (currentState is null) {
             currentState = this._Builder.InitialState;
             this._State = currentState;
-            this._State.OnEnter(currentEvent, null);
+            await this._State.OnEnterAsync(currentEvent, default);
         }
         var transition = currentState.GetTransition(currentEvent);
         var nextState = transition?.ToState ?? this._Builder.ErrorState;
         if (ReferenceEquals(currentState, nextState)) {
-            transition?.OnExecute(currentEvent, nextState);
+            if (transition is { }) {
+                await transition.OnExecuteAsync(currentEvent, nextState);
+            }
             return currentState;
         } else {
-            currentState.OnExit(currentEvent, nextState);
-            transition?.OnExecute(currentEvent, nextState);
+            await currentState.OnExitAsync(currentEvent, nextState);
+            if (transition is { }) {
+                await transition.OnExecuteAsync(currentEvent, nextState);
+            }
             this._State = nextState;
-            nextState.OnEnter(currentEvent, currentState);
+            await nextState.OnEnterAsync(currentEvent, currentState);
             return nextState;
         }
     }
