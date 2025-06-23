@@ -95,6 +95,32 @@ public class StateTransitionWithChecker<TEvent> : StateTransition<TEvent> {
         return this._Checker.CheckEvent(currentEvent);
     }
 }
+
+public class StateTransitionDelegate<TEvent> : StateTransition<TEvent> {
+    private readonly Func<TEvent, bool> _OnCheckEvent;
+    private readonly Func<TEvent, State<TEvent>, ValueTask>? _OnExecuteAsync;
+
+    public StateTransitionDelegate(
+        string eventName,
+        Func<TEvent, bool> checkEvent,
+        Func<TEvent, State<TEvent>, ValueTask>? executeAsync
+        ) : base(eventName) {
+        this._OnCheckEvent = checkEvent;
+        this._OnExecuteAsync = executeAsync;
+    }
+
+    public override bool CheckEvent(TEvent currentEvent) {
+        return this._OnCheckEvent(currentEvent);
+    }
+
+    public override async ValueTask OnExecuteAsync(TEvent currentEvent, State<TEvent> nextState) {
+        if (this._OnExecuteAsync is not null) {
+            await this._OnExecuteAsync(currentEvent, nextState);
+        }
+    }
+}
+
+
 public class StateMachineBuilder<TEvent> {
     private readonly List<State<TEvent>> _ListState = new();
     private readonly State<TEvent> _InitialState;
