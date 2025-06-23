@@ -1,5 +1,5 @@
 ﻿namespace Brimborium.Automata;
-#if false
+#if true
 /// <summary>
 /// Defines the kind of state in a state machine.
 /// </summary>
@@ -19,10 +19,10 @@ public enum StateKind {
 /// </summary>
 /// <typeparam name="TEvent">The type of events that can trigger state transitions.</typeparam>
 public class State<TEvent> {
-
     private readonly List<StateTransition<TEvent>> _ListTransitions = new();
     private readonly string _Name;
     private readonly StateKind _StateKind;
+    internal protected StateMachineBuilder<TEvent>? _Builder;
 
     /// <summary>
     /// Gets the name of the state.
@@ -89,6 +89,11 @@ public class State<TEvent> {
         return ValueTask.CompletedTask;
     }
 }
+
+public record class StatePayload<TEvent, TPayload> (
+    State<TEvent> State,
+    TPayload Payload
+);
 
 /// <summary>
 /// Defines an interface for checking if an event should trigger a state transition.
@@ -277,6 +282,9 @@ public class StateMachineBuilder<TEvent> {
         this._ListState.Add(this._InitialState = (initialState ?? new State<TEvent>("InitialState", StateKind.Initial)));
         this._ListState.Add(this._FinalState = (finalState ?? new State<TEvent>("FinalState", StateKind.Final)));
         this._ListState.Add(this._ErrorState = (errorState ?? new State<TEvent>("ErrorState", StateKind.Error)));
+        this._InitialState._Builder = this; 
+        this._FinalState._Builder = this; 
+        this._ErrorState._Builder = this;
     }
 
     /// <summary>
@@ -286,6 +294,7 @@ public class StateMachineBuilder<TEvent> {
     /// <returns>The created state for further configuration.</returns>
     public State<TEvent> State(string name) {
         var state = new State<TEvent>(name, StateKind.Normal);
+        state._Builder = this; // Set the builder reference for the state
         this._ListState.Add(state);
         return state;
     }
@@ -294,10 +303,17 @@ public class StateMachineBuilder<TEvent> {
     /// Adds an existing state to the state machine.
     /// </summary>
     /// <param name="state">The state to add.</param>
-    /// <returns>The added state for further configuration.</returns>
-    public State<TEvent> State(State<TEvent> state) {
-        this._ListState.Add(state);
-        return state;
+    /// <returns>Fluent this</returns>
+    public StateMachineBuilder<TEvent> State(params State<TEvent>[] states) {
+        foreach (var state in states) {
+            if (state._Builder is { }) {
+                // skip adding if the state already has a builder reference
+            } else {
+                this._ListState.Add(state);
+                state._Builder = this; // Set the builder reference for each state
+            }
+        }
+        return this;
     }
 }
 
@@ -308,7 +324,7 @@ public class StateMachineBuilder<TEvent> {
 public class StateMachine<TEvent> {
     private readonly StateMachineBuilder<TEvent> _Builder;
     private State<TEvent>? _State;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="StateMachine{TEvent}"/> class.
     /// </summary>
@@ -316,13 +332,34 @@ public class StateMachine<TEvent> {
     public StateMachine(StateMachineBuilder<TEvent> builder) {
         this._Builder = builder;
     }
-    
+
     /// <summary>
     /// Gets the current state of the state machine.
     /// If no state has been set yet, returns the initial state.
     /// </summary>
     public State<TEvent> State {
         get => this._State ?? this._Builder.InitialState;
+        set => this._State = value;
+    }
+
+    public async Task<State<TEvent>> GotoAsync(TEvent currentEvent, State<TEvent> nextState , StateTransition<TEvent>? transition) {
+        var currentState = this._State ?? nextState;
+        if (ReferenceEquals(currentState, nextState)) {
+            // Self-transition (staying in the same state)
+            if (transition is { }) {
+                await transition.OnExecuteAsync(currentEvent, nextState);
+            }
+            return nextState;
+        } else {
+            // Transition to a different state
+            await currentState.OnExitAsync(currentEvent, nextState);
+            if (transition is { }) {
+                await transition.OnExecuteAsync(currentEvent, nextState);
+            }
+            this._State = nextState;
+            await nextState.OnEnterAsync(currentEvent, currentState);
+            return nextState;
+        }
     }
 
     /// <summary>
@@ -343,27 +380,12 @@ public class StateMachine<TEvent> {
             this._State = currentState;
             await this._State.OnEnterAsync(currentEvent, default);
         }
-        
+
         // Find the transition for this event, or use error state if no transition is found
         var transition = currentState.GetTransition(currentEvent);
         var nextState = transition?.ToState ?? this._Builder.ErrorState;
-        
-        if (ReferenceEquals(currentState, nextState)) {
-            // Self-transition (staying in the same state)
-            if (transition is { }) {
-                await transition.OnExecuteAsync(currentEvent, nextState);
-            }
-            return currentState;
-        } else {
-            // Transition to a different state
-            await currentState.OnExitAsync(currentEvent, nextState);
-            if (transition is { }) {
-                await transition.OnExecuteAsync(currentEvent, nextState);
-            }
-            this._State = nextState;
-            await nextState.OnEnterAsync(currentEvent, currentState);
-            return nextState;
-        }
+
+        return await this.GotoAsync(currentEvent, nextState, transition).ConfigureAwait(false);
     }
 }
 #endif
