@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -7,15 +6,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>Brimborium.Automata</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="TUnit" Version="0.25.21" />
     <PackageReference Include="Verify" Version="30.4.0" />
     <PackageReference Include="Verify.TUnit" Version="30.4.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\Brimborium.Automata\Brimborium.Automata.csproj" />
   </ItemGroup>
-
 </Project>
