@@ -1,8 +1,4 @@
-﻿using Humanizer;
-using System.Net;
-using System.Text;
-
-namespace SampleWebApp.Playwright.Utility;
+﻿namespace SampleWebApp.Playwright.Utility;
 
 public record UrlValued(
         UrlTemplate UrlTemplate,

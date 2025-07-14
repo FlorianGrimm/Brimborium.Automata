@@ -7,55 +7,54 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SampleWebApp;
 
-namespace SampleWebApp.Pages.UIEbbes
+namespace SampleWebApp.Pages.UIEbbes;
+
+public class DeleteModel : PageModel
 {
-    public class DeleteModel : PageModel
+    private readonly SampleWebApp.DatabaseContext _DatabaseContext;
+
+    public DeleteModel(SampleWebApp.DatabaseContext databaseContext)
     {
-        private readonly SampleWebApp.DatabaseContext _DatabaseContext;
+        this._DatabaseContext = databaseContext;
+    }
 
-        public DeleteModel(SampleWebApp.DatabaseContext databaseContext)
+    [BindProperty]
+    public Ebbes Ebbes { get; set; } = default!;
+
+    public async Task<IActionResult> OnGetAsync(Guid? id)
+    {
+        if (id == null)
         {
-            _DatabaseContext = databaseContext;
+            return this.NotFound();
         }
 
-        [BindProperty]
-        public Ebbes Ebbes { get; set; } = default!;
+        var ebbes = await this._DatabaseContext.Ebbes.FirstOrDefaultAsync(m => m.Id == id);
 
-        public async Task<IActionResult> OnGetAsync(Guid? id)
+        if (ebbes is not null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            this.Ebbes = ebbes;
 
-            var ebbes = await _DatabaseContext.Ebbes.FirstOrDefaultAsync(m => m.Id == id);
-
-            if (ebbes is not null)
-            {
-                Ebbes = ebbes;
-
-                return Page();
-            }
-
-            return NotFound();
+            return this.Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(Guid? id)
+        return this.NotFound();
+    }
+
+    public async Task<IActionResult> OnPostAsync(Guid? id)
+    {
+        if (id == null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var ebbes = await _DatabaseContext.Ebbes.FindAsync(id);
-            if (ebbes != null)
-            {
-                Ebbes = ebbes;
-                _DatabaseContext.Ebbes.Remove(Ebbes);
-                await _DatabaseContext.SaveChangesAsync();
-            }
-
-            return RedirectToPage("./Index");
+            return this.NotFound();
         }
+
+        var ebbes = await this._DatabaseContext.Ebbes.FindAsync(id);
+        if (ebbes != null)
+        {
+            this.Ebbes = ebbes;
+            this._DatabaseContext.Ebbes.Remove(this.Ebbes);
+            await this._DatabaseContext.SaveChangesAsync();
+        }
+
+        return this.RedirectToPage("./Index");
     }
 }

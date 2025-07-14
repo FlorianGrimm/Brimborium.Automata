@@ -7,22 +7,21 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SampleWebApp;
 
-namespace SampleWebApp.Pages.UIEbbes
+namespace SampleWebApp.Pages.UIEbbes;
+
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly SampleWebApp.DatabaseContext _DatabaseContext;
+
+    public IndexModel(SampleWebApp.DatabaseContext databaseContext)
     {
-        private readonly SampleWebApp.DatabaseContext _DatabaseContext;
+        this._DatabaseContext = databaseContext;
+    }
 
-        public IndexModel(SampleWebApp.DatabaseContext databaseContext)
-        {
-            _DatabaseContext = databaseContext;
-        }
+    public IList<Ebbes> Ebbes { get;set; } = default!;
 
-        public IList<Ebbes> Ebbes { get;set; } = default!;
-
-        public async Task OnGetAsync()
-        {
-            Ebbes = await _DatabaseContext.Ebbes.ToListAsync();
-        }
+    public async Task OnGetAsync()
+    {
+        this.Ebbes = await this._DatabaseContext.Ebbes.ToListAsync();
     }
 }

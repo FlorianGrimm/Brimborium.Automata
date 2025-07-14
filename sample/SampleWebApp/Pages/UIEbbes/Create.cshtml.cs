@@ -1,43 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using SampleWebApp;
+﻿namespace SampleWebApp.Pages.UIEbbes;
 
-namespace SampleWebApp.Pages.UIEbbes
+public class CreateModel : PageModel
 {
-    public class CreateModel : PageModel
+    private readonly SampleWebApp.DatabaseContext _DatabaseContext;
+
+    public CreateModel(SampleWebApp.DatabaseContext databaseContext)
     {
-        private readonly SampleWebApp.DatabaseContext _DatabaseContext;
+        this._DatabaseContext = databaseContext;
+    }
 
-        public CreateModel(SampleWebApp.DatabaseContext databaseContext)
+    public IActionResult OnGet()
+    {
+        return this.Page();
+    }
+
+    [BindProperty]
+    public Ebbes Ebbes { get; set; } = default!;
+
+    // For more information, see https://aka.ms/RazorPagesCRUD.
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (!this.ModelState.IsValid)
         {
-            _DatabaseContext = databaseContext;
+            return this.Page();
         }
 
-        public IActionResult OnGet()
-        {
-            return Page();
-        }
+        this._DatabaseContext.Ebbes.Add(this.Ebbes);
+        await this._DatabaseContext.SaveChangesAsync();
 
-        [BindProperty]
-        public Ebbes Ebbes { get; set; } = default!;
-
-        // For more information, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
-        {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            _DatabaseContext.Ebbes.Add(Ebbes);
-            await _DatabaseContext.SaveChangesAsync();
-
-            return RedirectToPage("./Index");
-        }
+        return this.RedirectToPage("./Index");
     }
 }

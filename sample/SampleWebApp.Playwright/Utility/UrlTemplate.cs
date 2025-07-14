@@ -1,10 +1,5 @@
 ﻿#pragma warning disable IDE0057 // Use range operator
-#pragma warning disable IDE0290 // Use primary constructor
 #pragma warning disable IDE0305 // Simplify collection initialization
-
-using System.Diagnostics.CodeAnalysis;
-using System.Net;
-using System.Text;
 
 namespace SampleWebApp.Playwright.Utility;
 
@@ -266,6 +261,19 @@ public class UrlTemplate {
     }
 
     /// <summary>
+    /// <see cref="TryParse(string, out UrlTemplate)"/>.
+    /// </summary>
+    /// <param name="value">a server-relative url - absolut paths are not supported.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static UrlTemplate Parse(string value) {
+        if (TryParse(value, out var result)) {
+            return result;
+        } else {
+            throw new ArgumentException("Invalid UrlTemplate", nameof(value));
+        }
+    }
+    /// <summary>
     /// Initializes a new instance of the <see cref="UrlTemplate"/> class with the specified parts.
     /// </summary>
     /// <param name="parts">An array of <see cref="UrlTemplatePart"/> objects that make up this URL template.</param>
@@ -301,7 +309,7 @@ public class UrlTemplate {
     public override string ToString() {
         var len = 0;
         foreach (var part in this.Parts) { len += part.GetUrlTemplateTextLength(); }
-        var sb = new StringBuilder((1 + (len >> 12)) << 12);
+        var sb = new StringBuilder(1 + (len >> 12) << 12);
         foreach (var part in this.Parts) { part.BuildUrlTemplateText(sb); }
         return sb.ToString();
     }

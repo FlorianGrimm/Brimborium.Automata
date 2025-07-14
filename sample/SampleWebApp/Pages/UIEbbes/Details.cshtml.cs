@@ -7,36 +7,35 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SampleWebApp;
 
-namespace SampleWebApp.Pages.UIEbbes
+namespace SampleWebApp.Pages.UIEbbes;
+
+public class DetailsModel : PageModel
 {
-    public class DetailsModel : PageModel
+    private readonly SampleWebApp.DatabaseContext _DatabaseContext;
+
+    public DetailsModel(SampleWebApp.DatabaseContext databaseContext)
     {
-        private readonly SampleWebApp.DatabaseContext _DatabaseContext;
+        this._DatabaseContext = databaseContext;
+    }
 
-        public DetailsModel(SampleWebApp.DatabaseContext databaseContext)
+    public Ebbes Ebbes { get; set; } = default!;
+
+    public async Task<IActionResult> OnGetAsync(Guid? id)
+    {
+        if (id == null)
         {
-            _DatabaseContext = databaseContext;
+            return this.NotFound();
         }
 
-        public Ebbes Ebbes { get; set; } = default!;
+        var ebbes = await this._DatabaseContext.Ebbes.FirstOrDefaultAsync(m => m.Id == id);
 
-        public async Task<IActionResult> OnGetAsync(Guid? id)
+        if (ebbes is not null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            this.Ebbes = ebbes;
 
-            var ebbes = await _DatabaseContext.Ebbes.FirstOrDefaultAsync(m => m.Id == id);
-
-            if (ebbes is not null)
-            {
-                Ebbes = ebbes;
-
-                return Page();
-            }
-
-            return NotFound();
+            return this.Page();
         }
+
+        return this.NotFound();
     }
 }

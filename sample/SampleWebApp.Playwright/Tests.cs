@@ -1,10 +1,21 @@
 ﻿namespace SampleWebApp.Playwright;
 
 public class Tests : AppPageTest {
+
     [Test]
-    public async Task Test() {
+    public async Task Test001() {
         await this.GotoHomeAsync();
 
+        // await Expect(Page)
+        /*
+        await Expect(Page).ToHaveURLAsync("");
+
+        await this.ThisAppDefinition.HomePage.ExpectedState(this);
+
+        var currentState = this.GetCurrentState();
+
+        await Assert.That(this).IsCurrentPage(this.ThisAppDefinition.HomePage);
+        */
         //// Expect a title "to contain" a substring.
         //await Expect(Page).ToHaveTitleAsync(new Regex("Playwright"));
 

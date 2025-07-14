@@ -1,18 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.Extensions.DependencyInjection;
+﻿namespace SampleWebApp.Playwright;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-
-using TUnit.Core.Interfaces;
-
-namespace SampleWebApp.Playwright;
-public class WebApplicationFactoryIntegration : IAsyncInitializer {
+public class Bridge : IAsyncInitializer {
     private WebApplication? _Application;
     public WebApplication GetApplication() => this._Application ?? throw new InvalidOperationException("Application yet is not set");
 
@@ -54,8 +42,9 @@ public class WebApplicationFactoryIntegration : IAsyncInitializer {
     public HttpClient CreateClient() {
         if (this._Application is null) { throw new Exception("InitializeAsync was not called"); }
 
-        var socketsHandler = new SocketsHttpHandler();
-        socketsHandler.Credentials = CredentialCache.DefaultCredentials;
+        var socketsHandler = new SocketsHttpHandler {
+            Credentials = CredentialCache.DefaultCredentials
+        };
         var result = new HttpClient(socketsHandler, true);
         if ((this.GetBaseAddress() is { Length: > 0 } baseAddress)) {
             result.BaseAddress = new Uri(baseAddress);
@@ -69,12 +58,12 @@ public class WebApplicationFactoryIntegration : IAsyncInitializer {
         var tsc = new TaskCompletionSource<WebApplication>();
         var taskServer = Program.RunAsync(
             runtimeOrTesttime: false,
-            args: new string[] {
+            args: [
                 @"--environment=Development",
                 $"--contentRoot={contentRoot}",
                 @"--applicationName=SampleWebApp",
                 $"--StaticAssets={pathStaticAssets}"
-            },
+            ],
             configureWebApplicationBuilder: null,
             configureWebApplication: null,
             runningWebApplication: (app, task) => {
@@ -87,9 +76,9 @@ public class WebApplicationFactoryIntegration : IAsyncInitializer {
     private static string GetPathStaticAssets() {
         var result = System.IO.Path.Combine(
             (System.IO.Path.GetDirectoryName(
-                typeof(WebApplicationFactoryIntegration).Assembly.Location ?? throw new Exception("")
+                typeof(Bridge).Assembly.Location ?? throw new Exception("")
                 ) ?? throw new Exception("")
-                ).Replace(@"\sample\SampleWebApp.Playwright\bin\", @"\src\SampleWebApp\bin\"),
+                ).Replace(@"\sample\SampleWebApp.Playwright\bin\", @"\sample\SampleWebApp\bin\"),
             "SampleWebApp.staticwebassets.endpoints.json");
         return result;
     }

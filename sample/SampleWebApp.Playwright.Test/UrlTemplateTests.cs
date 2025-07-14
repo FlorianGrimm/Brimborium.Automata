@@ -1,10 +1,5 @@
 #pragma warning disable IDE0301 // Simplify collection initialization
 
-using SampleWebApp.Playwright.Utility;
-using System.Text;
-using System.Threading.Tasks;
-using TUnit.Assertions.AssertConditions.Throws;
-
 namespace SampleWebApp.Playwright.Test;
 
 /// <summary>

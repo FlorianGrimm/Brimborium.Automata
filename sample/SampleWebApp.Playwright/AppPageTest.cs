@@ -1,12 +1,11 @@
-﻿using Microsoft.Playwright;
-
-using TUnit.Playwright;
-
-namespace SampleWebApp.Playwright;
+﻿namespace SampleWebApp.Playwright;
 
 public class AppPageTest : PageTest {
-    [ClassDataSource<WebApplicationFactoryIntegration>(Shared = SharedType.PerTestSession)]
-    public required WebApplicationFactoryIntegration WebApplicationFactory { get; init; }
+    [ClassDataSource<Bridge>(Shared = SharedType.PerTestSession)]
+    public required Bridge WebApplicationFactory { get; init; }
+
+    [ClassDataSource<ThisAppDefinition>(Shared = SharedType.PerTestSession)]
+    public required ThisAppDefinition ThisAppDefinition { get; init; }
 
     public override BrowserNewContextOptions ContextOptions(TestContext testContext) {
         return new() {
@@ -19,9 +18,10 @@ public class AppPageTest : PageTest {
         var baseAddress = this.WebApplicationFactory.GetBaseAddress();
         await this.Page.GotoAsync(baseAddress, options);
 
-        await this.ValidateAsync("/");
+        this.ThisAppDefinition.GetPageDefinitionFromUrl(this.Page.Url);
+        //await this.ValidateAsync("/");
     }
-
+    /*
     public async Task GotoPageAndValidateAsync(
         string url,
         PageGotoOptions? options = default) {
@@ -33,4 +33,5 @@ public class AppPageTest : PageTest {
         PageGotoOptions? options = default) {
         await Task.CompletedTask;
     }
+    */
 }

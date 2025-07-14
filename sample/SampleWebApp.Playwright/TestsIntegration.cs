@@ -1,12 +1,12 @@
 ﻿namespace SampleWebApp.Playwright;
 
 public class TestsIntegration {
-    [ClassDataSource<WebApplicationFactoryIntegration>(Shared = SharedType.PerTestSession)]
-    public required WebApplicationFactoryIntegration WebApplicationFactory { get; init; }
+    [ClassDataSource<Bridge>(Shared = SharedType.PerTestSession)]
+    public required Bridge Bridge { get; init; }
 
     [Test]
     public async Task PingTest() {
-        var client = this.WebApplicationFactory.CreateClient();
+        var client = this.Bridge.CreateClient();
 
         var response = await client.GetAsync("/ping");
 

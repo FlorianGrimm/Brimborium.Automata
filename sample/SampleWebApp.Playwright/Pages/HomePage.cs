@@ -1,6 +1,16 @@
-﻿using SampleWebApp.Playwright.Utility;
+﻿namespace SampleWebApp.Playwright.Pages;
 
-namespace SampleWebApp.Playwright.Pages;
-
-public class HomePage : PageDefinition {
+public class HomePage : ThisPageDefinition {
+    public HomePage(
+        ) : base(
+        urlTemplate: UrlTemplate.Parse("/")
+        ) {
+    }
+}
+public class PrivacyPage : ThisPageDefinition {
+    public PrivacyPage(
+        ) : base(
+        urlTemplate: UrlTemplate.Parse("/")
+        ) {
+    }
 }
