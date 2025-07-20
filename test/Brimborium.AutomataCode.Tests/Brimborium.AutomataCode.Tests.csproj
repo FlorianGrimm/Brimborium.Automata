@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Brimborium.AutomataCode</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data\DataClass.cs" />
+    <Compile Remove="Data\DataGenerator.cs" />
+    <Compile Remove="Data\DependencyInjectionClassConstructor.cs" />
+    <Compile Remove="GlobalSetup.cs" />
+    <Compile Remove="Tests.cs" />
+    <Compile Remove="Tests2.cs" />
+    <Compile Remove="Tests3.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Data\DataClass.cs" />
+    <None Include="Data\DataGenerator.cs" />
+    <None Include="Data\DependencyInjectionClassConstructor.cs" />
+    <None Include="GlobalSetup.cs" />
+    <None Include="Tests.cs" />
+    <None Include="Tests2.cs" />
+    <None Include="Tests3.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="0.25.21" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Brimborium.AutomataCode\Brimborium.AutomataCode.csproj" />
+  </ItemGroup>
+
+</Project>
