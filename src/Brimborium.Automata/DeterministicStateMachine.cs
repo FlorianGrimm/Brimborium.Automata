@@ -1,4 +1,10 @@
 ﻿namespace Brimborium.Automata;
+
+/// <summary>
+/// This file contains legacy deterministic state machine implementations that are currently disabled.
+/// The code is preserved for reference but is not compiled due to the #if false directive.
+/// For active state machine implementations, see DeterministicStateMachineAsyncT.cs.
+/// </summary>
 #if false
 public class State {
 
