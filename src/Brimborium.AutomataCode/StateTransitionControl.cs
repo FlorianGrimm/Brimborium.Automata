@@ -213,7 +213,7 @@ public class StateTransitionControl<TStateMessage> {
 
         static void Add(
             List<IStateRunning<TStateMessage>> result, IStateRunning<TStateMessage>? value,
-            List<IStateRunning<TStateMessage>> listEnter, IStateRunning<TStateMessage>? previous
+            List<IStateRunning<TStateMessage>>? listEnter, IStateRunning<TStateMessage>? previous
             ) {
             if (value is { }) {
                 if (0 < result.Count && result.Contains(value)) {
