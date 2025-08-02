@@ -16,6 +16,8 @@ public enum StateRunningTransitionKind {
     /// <summary>Creating a parallel execution path (fork).</summary>
     Fork,
 
+    Epsilon,
+
     /// <summary>Terminating the current state execution.</summary>
     Terminate,
 

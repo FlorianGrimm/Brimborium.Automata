@@ -1,8 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
-
-
-namespace Brimborium.AutomataCode;
+﻿namespace Brimborium.AutomataCode;
 
 /// <summary>
 /// Represents a state machine that processes state messages and manages state transitions.
@@ -48,12 +44,22 @@ public class StateMaschine<TStateMessage> : IStateDefinitionBuilder<TStateMessag
     /// <param name="message">The state message to process.</param>
     /// <returns>A list of states that returned during processing, or null if no states returned.</returns>
     public List<IStateRunning<TStateMessage>>? HandleIncoming(TStateMessage message) {
-        var listCurrentState = this.GetListCurrentState();
         var stateTransition = new StateTransitionControl<TStateMessage>(this);
-        foreach (var currentState in listCurrentState) {
-            currentState.HandleIncoming(message, stateTransition);
+        HandleTransactionsResult<TStateMessage>? handleTransactionsResult=null;
+        int idx = 0;
+        var listCurrentState = stateTransition.GetListRemainingState();
+        while (0 < listCurrentState.Count) {
+            for (; idx < listCurrentState.Count; idx++) {
+                IStateRunning<TStateMessage>? currentState = listCurrentState[idx];
+                currentState.HandleIncoming(message, stateTransition);
+            }
+            handleTransactionsResult = stateTransition.HandleTransactions(listCurrentState, true);
+            listCurrentState = stateTransition.GetListRemainingState();
         }
-        var handleTransactionsResult = stateTransition.HandleTransactions(listCurrentState, true);
+        if (handleTransactionsResult is null) {
+            return null;
+        }
+
         if (handleTransactionsResult.ListEnter is { } listEnter) {
             foreach (var nextState in listEnter) {
                 if (nextState is IStateRunningEnter<TStateMessage> stateRunningEnter) {

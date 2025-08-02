@@ -6,6 +6,10 @@
 /// <typeparam name="TStateMessage">The type of messages that trigger state transitions.</typeparam>
 public class StateTransitionControl<TStateMessage> {
     private readonly StateMaschine<TStateMessage> _StateMaschine;
+
+    private List<IStateRunning<TStateMessage>> _ListCurrentState;
+    private List<IStateRunning<TStateMessage>> _ListRemainingState;
+
     private readonly List<StateRunningTransition<TStateMessage>> _ListStateRunningTransition = new();
 
     /// <summary>
@@ -15,8 +19,16 @@ public class StateTransitionControl<TStateMessage> {
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="stateMaschine"/> is null.</exception>
     public StateTransitionControl(StateMaschine<TStateMessage> stateMaschine) {
         this._StateMaschine = stateMaschine ?? throw new ArgumentNullException(nameof(stateMaschine));
+        this._ListCurrentState = stateMaschine.GetListCurrentState().ToList();
+        this._ListRemainingState = new(this._ListCurrentState);
     }
 
+    public List<IStateRunning<TStateMessage>> GetListRemainingState() { 
+        var result = this._ListRemainingState;
+        this._ListRemainingState=new();
+        return result;
+    }
+        
     /// <summary>
     /// Adds a start transition from a previous state to a new state.
     /// </summary>
