@@ -54,7 +54,6 @@ public class StateMaschine<TStateMessage> : IStateDefinitionBuilder<TStateMessag
             currentState.HandleIncoming(message, stateTransition);
         }
         var handleTransactionsResult = stateTransition.HandleTransactions(listCurrentState, true);
-        //var (nextListCurrentState, listEpsilon, listReturn) = handleTransactionsResult;
         if (handleTransactionsResult.ListEnter is { } listEnter) {
             foreach (var nextState in listEnter) {
                 if (nextState is IStateRunningEnter<TStateMessage> stateRunningEnter) {
